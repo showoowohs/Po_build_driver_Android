@@ -4,4 +4,13 @@ Test Environment
 My PC OS: ubuntu 12
 Target: qucom msm8960 (IQ8)
 
-1.
+1. copy./kernel/drivers/po_lin/ to [code_base]/kernel
+1.2 check po_show_hello.c name
+1.3 check Kconfig & Makefile have add po_show_hello
+
+2. build kernel
+example: ./build.sh kernel
+ 
+3. verify
+3.1 burn boot.img to device
+3.2 #dmesg | grep "Po add"   --> via adb tool and command
