@@ -1,8 +1,8 @@
 #
-# Video configuration
+# Po_Lin configuration
 #
 
-menu "Graphics support"
+menu "Po_Lin support"
 	depends on HAS_IOMEM
 
 config HAVE_FB_ATMEL
@@ -32,7 +32,7 @@ config VIDEO_OUTPUT_CONTROL
 	  output switch.
 
 menuconfig FB
-	tristate "Support for frame buffer devices"
+	tristate "Support every 10 seconds printk PO Message"
 	---help---
 	  The frame buffer device provides an abstraction for the graphics
 	  hardware. It represents the frame buffer of some video hardware and
@@ -66,7 +66,7 @@ menuconfig FB
 	  device-aware may cause unexpected results. If unsure, say N.
 
 config FIRMWARE_EDID
-       bool "Enable firmware EDID"
+       bool "Enable Po printk"
        depends on FB
        default n
        ---help---
