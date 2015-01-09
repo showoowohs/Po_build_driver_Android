@@ -14,3 +14,12 @@ example: ./build.sh kernel
 3. verify
 3.1 burn boot.img to device
 3.2 #dmesg | grep "Po add"   --> via adb tool and command
+
+
+How to use menuconfig
+1. cd ./kernel/
+
+2. menuconfig
+example: ./make_defconfig.sh msm8960_defconfig
+
+3. move --> Device/Driver --> Po_Lin support --> Support every 10 seconds printk PO Message --> Enable Po printk
