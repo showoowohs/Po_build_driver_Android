@@ -6,3 +6,5 @@
 
 obj-y                             += po_show_hello.o
 obj-$(CONFIG_Po_printk)           += po_Kthread.o
+obj-y                             += po_seq_file.o
+obj-$(CONFIG_PO_write_proc)       += po_write_proc.o

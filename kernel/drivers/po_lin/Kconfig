@@ -31,6 +31,12 @@ config VIDEO_OUTPUT_CONTROL
 	  This framework adds support for low-level control of the video 
 	  output switch.
 
+config PO_write_proc
+	tristate "enable po_write_proc"
+        default y
+	help
+          If you enable , can write /proc/po_write_proc
+
 menuconfig Po_check_printk
 	tristate "Support every 10 seconds printk PO Message"
         default y
