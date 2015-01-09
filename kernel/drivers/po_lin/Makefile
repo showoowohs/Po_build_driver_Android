@@ -5,4 +5,4 @@
 # Each configuration option enables a list of files.
 
 obj-y                             += po_show_hello.o
-obj-$(CONFIG_Po_check_printk)     += po_Kthread.o
+obj-$(CONFIG_Po_printk)           += po_Kthread.o
