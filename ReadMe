@@ -23,3 +23,12 @@ How to use menuconfig
 example: ./make_defconfig.sh msm8960_defconfig
 
 3. move --> Device/Driver --> Po_Lin support --> Support every 10 seconds printk PO Message --> Enable Po printk
+
+Kconfig & Makefile:
+1. can set Makefile 中的 xxx.o = y
+example: obj-y    += po_show_hello.o
+
+2. can set Kconfig config_XXX, then via Makefile enable xxx.o
+example:
+Kconfig  -->  set config Po_printk
+Makefile -->  set obj-$(CONFIG_Po_printk)     += po_Kthread.o 
