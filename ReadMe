@@ -32,3 +32,9 @@ example: obj-y    += po_show_hello.o
 example:
 Kconfig  -->  set config Po_printk
 Makefile -->  set obj-$(CONFIG_Po_printk)     += po_Kthread.o 
+
+Function list
+1. po_show_hell.c can via kernel message see hello msg
+2. po_Kthread.c can printk message
+3. po_seq_file.c can read /proc/xxx info
+4. po_write_proc.c can write/read /proc/xxx
