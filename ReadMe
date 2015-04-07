@@ -1,4 +1,4 @@
-How to build driver (on Android)
+# How to build driver (on Android)
 
 Test Environment
 My PC OS: ubuntu 12
@@ -16,7 +16,7 @@ example: ./build.sh kernel
 3.2 #dmesg | grep "Po add"   --> via adb tool and command
 
 
-How to use menuconfig
+# How to use menuconfig
 1. cd ./kernel/
 
 2. menuconfig
@@ -38,3 +38,15 @@ Function list
 2. po_Kthread.c can printk message
 3. po_seq_file.c can read /proc/xxx info
 4. po_write_proc.c can write/read /proc/xxx
+
+Po_GPIO_dev
+### depiction
+1. can read GPIO 16
+2. on init save GPIO status to Po_AC_status
+3. IRQ enable, if have IRQ signal, read GPIO 16 and save to Po_AC_status
+4. open kthread read Po_AC_status
+
+### How to build Po_GPIO_dev
+1. checkout branch(Po_GPIO_dev)
+
+
