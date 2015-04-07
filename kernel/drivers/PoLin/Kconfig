@@ -1,0 +1,83 @@
+#
+# Po_Lin configuration
+#
+
+menu "Po_Lin support"
+	depends on HAS_IOMEM
+
+config HAVE_FB_ATMEL
+	bool
+
+config SH_MIPI_DSI
+	tristate
+	depends on (SUPERH || ARCH_SHMOBILE) && HAVE_CLK
+
+config SH_LCD_MIPI_DSI
+	bool
+
+
+
+
+
+
+
+config VGASTATE
+       tristate
+       default n
+
+config VIDEO_OUTPUT_CONTROL
+	tristate "Lowlevel video output switch controls"
+	help
+	  This framework adds support for low-level control of the video 
+	  output switch.
+
+config Po_GPIO_IRQ
+	tristate "enable Po_GPIO_IRQ"
+        default y
+	help
+          If you enable , can write /proc/po_write_proc
+
+menuconfig Po_check_printk
+	tristate "Support every 10 seconds printk PO Message"
+        default y
+	---help---
+	  The frame buffer device provides an abstraction for the graphics
+	  hardware. It represents the frame buffer of some video hardware and
+	  allows application software to access the graphics hardware through
+	  a well-defined interface, so the software doesn't need to know
+	  anything about the low-level (hardware register) stuff.
+
+	  Frame buffer devices work identically across the different
+	  architectures supported by Linux and make the implementation of
+	  application programs easier and more portable; at this point, an X
+	  server exists which uses the frame buffer device exclusively.
+	  On several non-X86 architectures, the frame buffer device is the
+	  only way to use the graphics hardware.
+
+	  The device is accessed through special device nodes, usually located
+	  in the /dev directory, i.e. /dev/fb*.
+
+	  You need an utility program called fbset to make full use of frame
+	  buffer devices. Please read <file:Documentation/fb/framebuffer.txt>
+	  and the Framebuffer-HOWTO at
+	  <http://www.munted.org.uk/programming/Framebuffer-HOWTO-1.3.html> for more
+	  information.
+
+	  Say Y here and to the driver for your graphics board below if you
+	  are compiling a kernel for a non-x86 architecture.
+
+	  If you are compiling for the x86 architecture, you can say Y if you
+	  want to play with it, but it is not essential. Please note that
+	  running graphical applications that directly touch the hardware
+	  (e.g. an accelerated X server) and that are not frame buffer
+	  device-aware may cause unexpected results. If unsure, say N.
+
+config Po_printk
+       bool "Enable Po printk"
+       depends on Po_check_printk
+       default y
+       ---help---
+       If you say Y, Po_printk can printk every 10 sec.  
+
+
+endmenu
