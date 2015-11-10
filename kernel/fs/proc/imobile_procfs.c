@@ -11,6 +11,7 @@
 #define PROC_KBD
 #define PROC_ETH0
 #define PROC_USBStatus
+#define PROC_MTKIMEI
 
 #ifdef PROC_ETH0
 static struct proc_dir_entry *eth0_file;
@@ -227,6 +228,7 @@ static int proc_read_kpd(
 	char *p = page;
 	int len = 0;
 
+	IMT8_printk("[kpd] proc_read_kpd(%d)\n", hotkeyIdx);
 	if (kpd_help == 1) {
 		kpd_help = 0;
 		p += sprintf (p, HELP);
@@ -678,6 +680,289 @@ static int proc_write_USBStatus(struct file *file, const char *buffer, unsigned 
 }
 #endif
 
+#ifdef PROC_MTKIMEI
+static struct proc_dir_entry *MTKIMEI_file;
+static int proc_read_MTKIMEI(char *page, char **start, off_t off, int count, int *eof, void *data);
+static int proc_write_MTKIMEI(struct file *file, const char *buffer, unsigned long count, void *data);
+static int MTKIMEI_help = 0;
+static int MTKIMEI_sim1 = 0;
+static int MTKIMEI_sim2 = 0;
+static char last_imei[100] = "";
+static char MTKIMEI_HELP[] =
+	"1. echo help > /proc/MTKIMEI\n"
+	"2. echo SIM1 (IMEI code+) > /proc/MTKIMEI\n"
+	"\t(can flash imei1, example: echo SIM1 555555555666666+ >  /proc/MTKIMEI\n"
+	"3. echo SIM2 (IMEI code+) > /proc/MTKIMEI\n"
+	"\t(can flash imei2, example: echo SIM2 777777777777777+ >  /proc/MTKIMEI\n";
+
+void InitKernelEnv(void){ 
+	oldfs = get_fs(); 
+	set_fs(KERNEL_DS); 
+} 
+
+void DinitKernelEnv(){
+	set_fs(oldfs); 
+}
+
+int ReadFile(struct file *fp,char *buf,int readlen) 
+{ 
+	if (fp->f_op && fp->f_op->read) 
+		return fp->f_op->read(fp,buf,readlen, &fp->f_pos); 
+	else 
+		return -1; 
+} 
+
+int WriteFile(struct file *fp,char *buf,int readlen) { 
+	if (fp->f_op && fp->f_op->read){ 
+		//char buf2[50] = "AT+EGMR=1,7,\"123456789012347\"\n";
+		//IMT8_printk("[Po add] %s 11 buf2=%s\n", __func__, buf2);  
+		//IMT8_printk("[Po add] %s 11 buf=%s\n", __func__, buf);  
+		return fp->f_op->write(fp,buf,readlen, &fp->f_pos); 
+	}else{ 
+		IMT8_printk("[Po add] %s 22\n", __func__);  
+		return -1; 
+	}
+} 
+
+struct file *OpenFile(char *path,int flag,int mode){ 
+	struct file *fp; 
+
+	fp=filp_open(path, flag, 0); 
+	if (fp) return fp; 
+	else return NULL; 
+}
+
+int CloseFile(struct file *fp) { 
+	filp_close(fp,NULL); 
+	return 0; 
+}
+
+static int proc_read_MTKIMEI(char *page, char **start, off_t off, int count, int *eof, void *data)
+{
+	char *p = page;
+	int len = 0;
+
+	if (MTKIMEI_help == 1) {
+		MTKIMEI_help = 0;
+		p += sprintf (p, MTKIMEI_HELP);
+		IMT8_printk("[Po add] %s %s\n", __func__, p);
+	}
+#if 0
+	}else if(MTKIMEI_sim1 == 1){
+		IMT8_printk("[Po add] %s %s\n", __func__, last_imei);
+		MTKIMEI_sim1 = 0;
+		
+		InitKernelEnv();
+		struct file *fp; 
+
+		//write to file
+		fp = OpenFile("/dev/radio/pttycmd1", O_WRONLY | O_CREAT, 0644); 
+		if (fp!= NULL) { 
+			WriteFile(fp, last_imei, sizeof(last_imei));
+			char tmp[] = "success\n";
+			p += sprintf (p, tmp);
+			IMT8_printk("[Po add] %s %s\n", __func__, p);
+		}else{
+			IMT8_printk("[Po add] fp = null\n");  
+			char tmp[] = "error\n";
+			p += sprintf (p, tmp);
+			IMT8_printk("[Po add] %s %s\n", __func__, p);
+		}
+
+		CloseFile(fp); 
+		DinitKernelEnv();
+
+
+	}
+#endif
+
+	*start = page + off;
+
+	len = p - page;
+	if (len <= off + count) *eof = 1;
+
+	len -= off;
+	if (len > count) len = count;
+	if (len < 0) len = 0;
+	return len;
+}
+
+//echo valume > /proc/MTKIMEI
+static int proc_write_MTKIMEI(struct file *file, const char *buffer, unsigned long count, void *data)
+{
+	char imei_data[50];
+
+	if (count > 50){
+		return -EINVAL;
+	}else if (count == 0) {
+		return 0;
+	}
+
+	if(copy_from_user(imei_data, buffer, count)){
+		return -EFAULT;
+	}
+
+	if (imei_data[0] == 'h' || imei_data[0] == 'H') { // help
+		MTKIMEI_help = 1;
+		IMT8_printk("[Po add] %s Help\n", __func__);
+
+	}else if (strncmp(imei_data, "SIM1", 4) == 0){
+
+		IMT8_printk("[Po add] %s imei_data= %s\n", __func__, imei_data);
+
+#if 0
+		InitKernelEnv();
+		// read
+		//read file
+		struct file *fp; 
+		char read_buf[50] = "";
+		char tmp_IMEICODE[20] = "";
+		fp = OpenFile("/sdcard/sim1", O_RDONLY | O_CREAT, 0); 
+		if(fp != NULL){ 
+			ReadFile(fp, read_buf, sizeof(read_buf));
+			IMT8_printk("[Po add] %s read_buf= %sx\n", __func__, read_buf);
+			//IMT8_printk("[Po add] %s strlen(read_buf)= %d\n", __func__, strlen(read_buf));
+			if(strlen(read_buf) > 15){
+				char* const delim = "\0";  
+				char *token, *cur = read_buf;  
+
+				int len=(strlen(read_buf))-1, i; 
+				for(i=0; i<len; i++) {
+					tmp_IMEICODE[i]=read_buf[i]; 
+				}
+			}
+		}else{
+			IMT8_printk("[Po add] %s open file error!\n", __func__);
+		}
+		IMT8_printk("[Po add] %s tmp_IMEICODE=%s\n", __func__, tmp_IMEICODE);  
+
+		CloseFile(fp); 
+		//read End
+
+
+		char cmd[70]="AT+EGMR=1,7,\"";
+		strcat(cmd, tmp_IMEICODE);
+		strcat(cmd, "\"\n");
+		IMT8_printk("[Po add] cmd=%s\n", cmd);  
+
+
+		//write to file
+		fp = OpenFile("/dev/radio/pttycmd1", O_WRONLY | O_CREAT, 0644); 
+		if (fp!= NULL) { 
+			WriteFile(fp, cmd, sizeof(cmd));
+		}else{
+			IMT8_printk("[Po add] fp = null\n");  
+		}
+
+
+		CloseFile(fp);
+		DinitKernelEnv();
+		
+		// read End
+#endif
+		// strsep
+		// SIM1 123456789012347+
+		char* const delim = " ";  
+		char *token, *cur = imei_data;  
+		char tmp_IMEICODE[50] = "";
+		while (token = strsep(&cur, delim)) {  
+			//IMT8_printk("[Po add] %s\n", token);  
+			strcpy(tmp_IMEICODE, token);
+		}
+		// start 
+		char* const delim2 = "+";  
+		char *token2, *cur2 = tmp_IMEICODE;  
+		char last_number[100] = "";
+		/*
+		while (token2 = strsep(&cur2, delim2)) {  
+			//IMT8_printk("[Po add] token2=%s\n", token2);  
+			//IMT8_printk("[Po add] end\n");  
+
+		}
+		*/
+		token2 = strsep(&cur2, delim2); 
+		strcpy(last_number, token2);
+		IMT8_printk("[Po add] last_number=%s\n", last_number);  
+		// End
+		char tmp1[70]="AT+EGMR=1,7,\"";
+		strcat(tmp1, tmp_IMEICODE);
+		strcat(tmp1, "\"\n");
+		IMT8_printk("[Po add] tmp1=%s\n", tmp1);  
+
+		strcpy(last_imei, tmp1);
+		IMT8_printk("[Po add] last_imei=%s\n", last_imei);  
+		MTKIMEI_sim1=1;
+		IMT8_printk("[Po add] MTKIMEI_sim1=%d\n", MTKIMEI_sim1);  
+
+		struct file *fp; 
+
+		//write to file
+		InitKernelEnv();
+		fp = OpenFile("/dev/radio/pttycmd1", O_WRONLY | O_CREAT, 0644); 
+		if (fp!= NULL) { 
+			WriteFile(fp, tmp1, sizeof(tmp1));
+		}else{
+			IMT8_printk("[Po add] fp = null\n");  
+		}
+
+		CloseFile(fp); 
+		DinitKernelEnv();
+	}else if (strncmp(imei_data, "SIM2", 4) == 0){
+
+		IMT8_printk("[Po add] %s imei_data= %s\n", __func__, imei_data);
+		// strsep
+		// SIM2 777777777777777+
+		char* const delim = " ";  
+		char *token, *cur = imei_data;  
+		char tmp_IMEICODE[50] = "";
+		while (token = strsep(&cur, delim)) {  
+			//IMT8_printk("[Po add] %s\n", token);  
+			strcpy(tmp_IMEICODE, token);
+		}
+		// start 
+		char* const delim2 = "+";  
+		char *token2, *cur2 = tmp_IMEICODE;  
+		char last_number[100] = "";
+		/*
+		while (token2 = strsep(&cur2, delim2)) {  
+			//IMT8_printk("[Po add] token2=%s\n", token2);  
+			//IMT8_printk("[Po add] end\n");  
+
+		}
+		*/
+		token2 = strsep(&cur2, delim2); 
+		strcpy(last_number, token2);
+		IMT8_printk("[Po add] last_number=%s\n", last_number);  
+		// End
+		char tmp1[70]="AT+EGMR=1,10,\"";
+		strcat(tmp1, tmp_IMEICODE);
+		strcat(tmp1, "\"\n");
+		IMT8_printk("[Po add] tmp1=%s\n", tmp1);  
+
+		strcpy(last_imei, tmp1);
+		IMT8_printk("[Po add] last_imei=%s\n", last_imei);  
+		MTKIMEI_sim2=1;
+		IMT8_printk("[Po add] MTKIMEI_sim2=%d\n", MTKIMEI_sim2);  
+
+		struct file *fp; 
+
+		//write to file
+		InitKernelEnv();
+		fp = OpenFile("/dev/radio/pttycmd1", O_WRONLY | O_CREAT, 0644); 
+		if (fp!= NULL) { 
+			WriteFile(fp, tmp1, sizeof(tmp1));
+		}else{
+			IMT8_printk("[Po add] fp = null\n");  
+		}
+
+		CloseFile(fp); 
+		DinitKernelEnv();
+	}
+	return count;
+}
+
+#endif
+
 static int __init proc_imobile_procfs_init(void)
 {
 #ifdef PROC_GPIO
@@ -706,6 +991,13 @@ static int __init proc_imobile_procfs_init(void)
 	USBStatus_file = create_proc_entry ("USBStatus", 0666, NULL);
 	USBStatus_file->read_proc = proc_read_USBStatus;
 	USBStatus_file->write_proc = proc_write_USBStatus;
+#endif
+
+#ifdef PROC_MTKIMEI
+	// for /proc/MTKIMEI
+	MTKIMEI_file = create_proc_entry ("MTKIMEI", 0666, NULL);
+	MTKIMEI_file->read_proc = proc_read_MTKIMEI;
+	MTKIMEI_file->write_proc = proc_write_MTKIMEI;
 #endif
 	//Enable USB power 
 	procfs_set_gpio(116, 0, -1, -1);
