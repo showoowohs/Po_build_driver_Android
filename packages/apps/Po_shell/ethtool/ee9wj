@@ -1,0 +1,129 @@
+#!/system/bin/sh
+PATH=/sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin
+cd /system/ethtool/
+# script to read file into bash array
+# script to set EEPROM to DM9621 using 'ethtool'
+echo "EEPROM utility, sh script, Davicom Inc. 2013."
+echo 
+
+if [ $# -eq 1 ]; then
+  echo "1 PARAM, EEPROM Utility..."
+elif [ $# -eq 2 ]; then
+  echo "2 PARAMs, EEPROM Utility..."
+elif [ $# -eq 0 ]; then
+  echo "No PARAM, EEPROM Utility..."
+else
+  echo "More than two PARAMs, EEPROM Utility..."
+fi
+
+if [ $# -eq 1 ]; then
+
+  echo "Dumping EEPROM ..."
+  ./ethtool -e $1 
+  
+elif [ $# -eq 2 ]; then
+
+# while read LINE; do
+#  ARRAY[$count]=$LINE
+#  ((count++))
+# done
+
+  filename=$2
+  nbyte=0
+  lineno=0
+  line=
+  val=
+
+  while read line; do
+    #echo "$lineno $nbyte"
+    echo "HEXStr row and elements: $lineno, 16"
+   #0
+    val=`echo $line | busybox cut -d' ' -f1`
+    #echo $val
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #1
+    val=`echo $line | busybox cut -d' ' -f2`
+    #echo $val
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #2
+    val=`echo $line | busybox cut -d' ' -f3`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #3
+    val=`echo $line | busybox cut -d' ' -f4`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+
+   #4
+    val=`echo $line | busybox cut -d' ' -f5`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #5
+    val=`echo $line | busybox cut -d' ' -f6`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #6
+    val=`echo $line | busybox cut -d' ' -f7`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #7
+    val=`echo $line | busybox cut -d' ' -f8`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+
+   #8
+    val=`echo $line | busybox cut -d' ' -f9`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #9
+    val=`echo $line | busybox cut -d' ' -f10`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #a
+    val=`echo $line | busybox cut -d' ' -f11`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #b
+    val=`echo $line | busybox cut -d' ' -f12`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+
+   #c
+    val=`echo $line | busybox cut -d' ' -f13`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #d
+    val=`echo $line | busybox cut -d' ' -f14`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #e
+    val=`echo $line | busybox cut -d' ' -f15`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+   #f
+    val=`echo $line | busybox cut -d' ' -f16`
+    ./ethtool -E $1 magic 0x9620 offset $nbyte value $val
+    nbyte=`busybox expr $nbyte + 1`
+
+   lineno=`busybox expr $lineno + 1`
+  done < $filename
+
+ #lineno=`busybox expr $lineno - 1`
+ echo "Number of raws: $lineno"
+ echo "Done"
+ 
+else
+
+  echo "Usage: ee9w interface [FILE]"
+  echo
+  echo "DM9620 series EEPROM write"
+  echo
+  echo "Options:"
+  echo "       interface    ethernet interface ethX, e.g. eth0."
+  echo "       FILE         data write into EEPROM, for normal mode, e.g. eepromdata.txt."
+  echo "                    Omit FILE argument to dump the chip EEPROM data."
+fi
+
+echo 

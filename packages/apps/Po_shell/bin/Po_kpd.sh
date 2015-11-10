@@ -1,0 +1,1 @@
+echo "NOTQUIET" > /proc/kmsg

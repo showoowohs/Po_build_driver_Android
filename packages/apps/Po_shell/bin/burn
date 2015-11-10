@@ -1,0 +1,29 @@
+#!/system/busybox/hush
+PATH=/system/busybox:$PATH
+if [ -f /data/aboot.mbn ]; then
+  mount -o remount,ro /
+  echo "burn aboot.mbn....."
+  dd if=/data/aboot.mbn of=/dev/block/mmcblk0p5 bs=1024k
+  rm -f /data/aboot.mbn
+  killall adbd
+fi
+if [ -f /data/boot.img ]; then
+  mount -o remount,ro /
+  echo "burn boot.img......"
+  dd if=/data/boot.img of=/dev/block/mmcblk0p7 bs=1024k
+  rm -f /data/boot.img
+  killall adbd
+fi
+if [ -f /data/system.tar.bz2 ]; then
+  cd /system
+  tar jxvf /data/system.tar.bz2
+  rm -f /data/system.tar.bz2
+  killall adbd
+fi
+if [ -f /data/recovery.img ]; then
+  mount -o remount,ro /
+  echo "burn recovery.img......"
+  dd if=/data/recovery.img of=/dev/block/mmcblk0p20 bs=1024k
+  rm -f /data/recovery.img
+  killall adbd
+fi
