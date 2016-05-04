@@ -419,19 +419,23 @@ service IAPD /system/bin/IAPD
 on boot
     write /proc/ecnr_fw_load 1
 
-# ECNR_DEBUG, ECNR_DEBUG_BT
+# ECNR_DEBUG
 on boot
     setprop media.ecnr.path 0
 #   chmod 0777 /cache
 
-service reBT /system/bin/sh system/bin/reBT.sh
-    disabled
-    oneshot
-
 on property:sys.system.init.done=1
     write /proc/t3_gpio !
 
-on property:bluetooth.init=1
-    start reBT
-#    chmod 0777 /system/bin/reBT.sh
-#    exec /system/bin/reBT.sh
+#Benson test
+service ScanBTWiFi /system/bin/sh system/bin/ScanBTWiFi.sh
+    disabled
+    oneshot
+
+on property:bluetooth.test=1
+    start ScanBTWiFi
+
+service logcat_benson /system/bin/logcat -f /dev/kmsg *:s "Benson"
+    class main
+    user root
+    group log
