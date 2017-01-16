@@ -35,6 +35,15 @@ static int mx6_benson_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "unable to get test-gpio\n");
 			goto error_request_gpio;
 		}
+
+		mdelay(500);
+		// gpio set hi or low
+		//gpio_set_value(gpio, 1);
+		
+		// setting gpio input 
+		//int fault;
+		//fault = gpio_get_value(gpio);
+		//printk("[Benson] %s() fault=%s\n", __func__, fault);
 	}
 
 	printk("[Benson] %s() End\n", __func__);
