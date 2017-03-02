@@ -12,8 +12,19 @@
 #include <linux/fs.h>
 #include <linux/seq_file.h>
 #include <asm/uaccess.h>
+#include <linux/irq.h>
+#include <linux/interrupt.h>
 
 #define PROC_GPIO
+
+#if 1
+static irqreturn_t benson_irq_handler(int irq, void *dev)
+{
+
+	printk("[Benson irq 2] %s\n", __func__);
+	return IRQ_HANDLED;
+}
+#endif
 
 #if defined(CONFIG_OF)
 static const struct of_device_id mx6_benson_dt_ids[] = {
@@ -129,12 +140,29 @@ static int mx6_benson_probe(struct platform_device *pdev)
 
 		mdelay(500);
 		// gpio set hi or low
-		gpio_set_value(gpio, 1);
+		//gpio_set_value(gpio, 1);
 		
+
+		//set input
+		gpio_direction_input(gpio);
+
 		// setting gpio input 
-		//int fault;
-		//fault = gpio_get_value(gpio);
-		//printk("[Benson] %s() fault=%s\n", __func__, fault);
+		int fault;
+		fault = gpio_get_value(gpio);
+		printk("[Benson] %s() fault=%d\n", __func__, !fault);
+#if 1
+		int ret, irq, error;
+
+		irq = gpio_to_irq(gpio);
+		if (irq < 0) {
+			error = irq;
+			printk("[Benson irq] Unable to get irq number for GPIO %d, error %d\n",	gpio, error);
+		}
+		ret = request_irq(irq, benson_irq_handler, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, "test irq", NULL);
+		if (ret < 0) {
+			printk("[Benson irq] %s failed to register irq %d!\n", __func__, gpio);
+		}
+#endif
 	}
 
 	printk("[Benson] %s() End\n", __func__);
