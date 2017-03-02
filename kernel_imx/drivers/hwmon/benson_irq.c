@@ -22,9 +22,11 @@ static const struct i2c_device_id bensondts_id[] = {
 	{}
 };
 
+
 static irqreturn_t benson_irq_handler(int irq, void *dev)
 {
 
+	printk("[Benson irq] %s\n", __func__);
 	return IRQ_HANDLED;
 }
 
@@ -40,6 +42,7 @@ static int bensondts_probe(struct i2c_client *client,
 	bool shared_irq;
 	int ret = 0;
 	u32 pos;
+	void *irq_dev_id; 
 	printk("[Benson irq] %s\n", __func__);
 	vdd = devm_regulator_get(&client->dev, "vdd");
 	if (!IS_ERR(vdd)) {
@@ -58,21 +61,29 @@ static int bensondts_probe(struct i2c_client *client,
 			return ret;
 		}
 	}
-	adapter = to_i2c_adapter(client->dev.parent);
+
+	// i2c 
+	//adapter = to_i2c_adapter(client->dev.parent);
 	
 	printk("[Benson irq] %s client->dev.driver->name=%s\n", __func__, client->dev.driver->name);
 	shared_irq = of_property_read_bool(of_node, "shared-interrupt");
 	if (client->irq) {
+		// get dts flag
 		irq_data = irq_get_irq_data(client->irq);
 		irq_flag = irqd_get_trigger_type(irq_data);
-		irq_flag |= IRQF_ONESHOT;
-		if (shared_irq)
+
+		if (shared_irq){
 				irq_flag |= IRQF_SHARED;
-		ret = request_irq(client->irq, benson_irq_handler,
-			irq_flag, client->dev.driver->name, NULL);
+				printk("[Benson irq] %s \n", __func__);
+		}
+
+		// request irq
+		ret = request_irq(client->irq, benson_irq_handler, irq_flag, client->dev.driver->name, NULL);
+		//ret = request_irq(client->irq, benson_irq_handler, IRQF_TRIGGER_FALLING, client->dev.driver->name, NULL);
+		printk("[Benson irq] %s IRQF_TRIGGER_LOW=%x!\n", __func__, IRQF_TRIGGER_LOW);
+		printk("[Benson irq] %s irq_flag=%x!\n", __func__, irq_flag);
 		if (ret < 0) {
-			dev_err(&client->dev, "failed to register irq %d!\n",
-					client->irq);
+			printk("[Benson irq] %s failed to register irq %d!\n", __func__, client->irq);
 		}
 	}
 	return 0;

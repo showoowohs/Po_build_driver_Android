@@ -639,8 +639,9 @@
 		position = <1>;
 		vdd-supply = <&reg_sensor>;
 		vddio-supply = <&reg_sensor>;
-		interrupt-parent = <&gpio2>;
-		interrupts = <23 1>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <14 2>;
+		#interrupt-route = <1>;
 	};
 
 	isl29023@44 {
