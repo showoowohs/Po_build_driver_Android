@@ -313,14 +313,14 @@
                         bt-power-gpios = <&gpio1 2 0>;
                                 status ="okay";
     };
-    mx6_benson {
-                compatible = "fsl,mx6_benson";
-                        test-gpio = <&gpio4 14 1>;
-                                status ="okay";
-			fsl,pins = <
-				MX6QDL_PAD_KEY_COL4__GPIO4_IO14 0x80000000
-			>;
-    };
+	mx6_benson {
+		compatible = "fsl,mx6_benson";
+		test-gpio = <&gpio3 15 1>;
+		status ="okay";
+		fsl,pins = <
+			MX6QDL_PAD_EIM_DA15__GPIO3_IO15 0x80000000 
+		>;
+	};
 
 	ramoops_device {
 		compatible = "fsl,mxc_ramoops";
@@ -633,6 +633,17 @@
 		interrupts = <16 1>;
 	};
 
+	bensondts@5e {
+		compatible = "fsl,bensondts";
+		reg = <0x5e>;
+		position = <1>;
+		vdd-supply = <&reg_sensor>;
+		vddio-supply = <&reg_sensor>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <14 2>;
+		#interrupt-route = <1>;
+	};
+
 	isl29023@44 {
 		compatible = "fsl,isl29023";
 		reg = <0x44>;
@@ -677,6 +688,10 @@
 				MX6QDL_PAD_NANDF_CS1__GPIO6_IO14 0x80000000
 				MX6QDL_PAD_NANDF_CS2__GPIO6_IO15 0x80000000
 				MX6QDL_PAD_NANDF_CS3__GPIO6_IO16 0x80000000
+				/* Baro int*/
+				MX6QDL_PAD_EIM_DA15__GPIO3_IO15 0x80000000 
+				/* GPS PPS*/
+				MX6QDL_PAD_EIM_D18__GPIO3_IO18 0x80000000
 			>;
 		};
 

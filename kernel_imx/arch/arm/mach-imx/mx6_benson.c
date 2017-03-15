@@ -130,19 +130,26 @@ static int mx6_benson_probe(struct platform_device *pdev)
 		printk(KERN_INFO "[Benson] test gpio is:%d\n", gpio);
 		rc = devm_gpio_request_one(&pdev->dev,
 				gpio,
-				//GPIOF_OUT_INIT_HIGH,
-				GPIOF_OUT_INIT_LOW,
+				GPIOF_OUT_INIT_HIGH,
+				//GPIOF_OUT_INIT_LOW,
 				"test gpio");
 		if (rc) {
 			dev_err(&pdev->dev, "unable to get test-gpio\n");
 			goto error_request_gpio;
 		}
 
+#undef OUTPUT
+#define INPUT
+#define IRQ
+
+#ifdef OUTPUT
 		mdelay(500);
 		// gpio set hi or low
-		//gpio_set_value(gpio, 1);
+		gpio_set_value(gpio, 0);
+#endif
 		
-
+#ifdef INPUT
+		mdelay(500);
 		//set input
 		gpio_direction_input(gpio);
 
@@ -150,7 +157,8 @@ static int mx6_benson_probe(struct platform_device *pdev)
 		int fault;
 		fault = gpio_get_value(gpio);
 		printk("[Benson] %s() fault=%d\n", __func__, !fault);
-#if 1
+#endif
+#ifdef IRQ
 		int ret, irq, error;
 
 		irq = gpio_to_irq(gpio);
